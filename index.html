@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>labyrinth game</title>
+
+<style>
+  #GameBoardCanvas {
+    padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  hr {
+    border: 1px solid black;
+  }
+
+  body {
+    padding: 5px;
+  }
+</style>
+
+<body>
+  <script
+    src="https://code.jquery.com/jquery-2.1.0.min.js"
+    integrity="sha256-8oQ1OnzE2X9v4gpRVRMb1DWHoPHJilbur1LP9ykQ9H0="
+    crossorigin="anonymous"
+  ></script>
+  <div>
+    <div
+      style="background-color: rebeccapurple;width: fit-content;display: flex;"
+    >
+      <canvas id="GameBoardCanvas" width="400px" height="400px"> </canvas>
+      <div style="background: white; padding-left: 2rem;">
+        <h1>Navigation</h1>
+        <hr />
+        <div>
+          <p><h3>(Up Arrow (↑))</h3></p>
+          <p><h3>(Down Arrow (↓))</h3></p>
+          <p><h3>(Right Arrow (←))</h3></p>
+          <p><h3>(Left Arrow (→))</h3></p>
+        </div>
+        <hr />
+        <div><h3>Up: <span id="up">0</span></h3></div>
+        <div><h3>Down: <span id="down">0</span></h3></div>
+        <div><h3>Right: <span id="right">0</span></h3></div>
+        <div><h3>Left: <span id="left">0</span></h3></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var canvas = $("#GameBoardCanvas");
+    //The game board 1 = walls, 0 = free space, and -1 = the goal
+    var board = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 1, 1, 1, 0, 1, 0],
+      [0, 1, 1, 0, 0, 0, 1, 0, 1, 0],
+      [0, 0, 1, 1, 1, 1, 1, 0, 1, 0],
+      [1, 0, 1, 0, 0, 0, 1, 0, 1, 0],
+      [1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+      [1, 0, 1, 0, 1, 0, 0, 1, 1, 0],
+      [-1, 0, 1, 0, 1, 1, 0, 0, 0, 0]
+    ];
+    var player = {
+      x: 0,
+      y: 0
+    };
+
+    //Draw the game board
+    function draw() {
+      var width = canvas.width();
+      var blockSize = width / board.length;
+      var ctx = canvas[0].getContext("2d");
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, width, width);
+      ctx.fillStyle = "white";
+      //Loop through the board array drawing the walls and the goal
+      for (var y = 0; y < board.length; y++) {
+        for (var x = 0; x < board[y].length; x++) {
+          //Draw a wall
+          if (board[y][x] === 1) {
+            ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+          }
+          //Draw the goal
+          else if (board[y][x] === -1) {
+            ctx.beginPath();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "gold";
+            ctx.moveTo(x * blockSize, y * blockSize);
+            ctx.lineTo((x + 1) * blockSize, (y + 1) * blockSize);
+            ctx.moveTo(x * blockSize, (y + 1) * blockSize);
+            ctx.lineTo((x + 1) * blockSize, y * blockSize);
+            ctx.stroke();
+          }
+        }
+      }
+      //Draw the player
+      ctx.beginPath();
+      var half = blockSize / 2;
+      ctx.fillStyle = "blue";
+      ctx.arc(
+        player.x * blockSize + half,
+        player.y * blockSize + half,
+        half,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+    }
+
+    //Check to see if the new space is inside the board and not a wall
+    function canMove(x, y) {
+      return (
+        y >= 0 &&
+        y < board.length &&
+        x >= 0 &&
+        x < board[y].length &&
+        board[y][x] != 1
+      );
+    }
+
+    var up = $("#up")[0];
+    var down = $("#down")[0];
+    var right = $("#right")[0];
+    var left = $("#left")[0];
+    var upC = 0;
+    var downC = 0;
+    var rightC = 0;
+    var leftC = 0;
+
+    $(document).keyup(function(e) {
+      if (e.which == 38 && canMove(player.x, player.y - 1)) {
+        //Up arrow
+        upC++;
+        up.innerHTML = upC;
+        player.y--;
+      } else if (e.which == 40 && canMove(player.x, player.y + 1)) {
+        // down arrow
+        downC++;
+        down.innerHTML = downC;
+        player.y++;
+      } else if (e.which == 37 && canMove(player.x - 1, player.y)) {
+        // right arrow
+        rightC++;
+        right.innerHTML = rightC;
+        player.x--;
+      } else if (e.which == 39 && canMove(player.x + 1, player.y)) {
+        // left arrow
+        leftC++;
+        left.innerHTML = leftC;
+        player.x++;
+      } else if (player.x === 0 && player.y === 9) {
+        setTimeout(() => {
+          alert("Congratulations");
+          location.reload();
+        }, 500);
+      }
+      draw();
+      e.preventDefault();
+    });
+
+    draw();
+  </script>
+</body>
